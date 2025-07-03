@@ -1,0 +1,54 @@
+% Code to plot simulation results from RefrigerationCycleAirConditioning
+%% Plot Description:
+%
+% This plot shows the subcooling at the condenser outlet and the superheat
+% at the evaporator outlet. The thermostatic expansion valve meters the
+% flow into the evaporator in order to maintain a superheat of 5 degC.
+
+% Copyright 2021 The MathWorks, Inc.
+
+% Generate simulation results if they don't exist
+if ~exist('simlog_RefrigerationCycleAirConditioning', 'var')
+    sim('RefrigerationCycleAirConditioning')
+end
+
+% Reuse figure if it exists, else create new figure
+if ~exist('h3_RefrigerationCycleAirConditioning', 'var') || ...
+        ~isgraphics(h3_RefrigerationCycleAirConditioning, 'figure')
+    h3_RefrigerationCycleAirConditioning = figure('Name', 'RefrigerationCycleAirConditioning');
+end
+figure(h3_RefrigerationCycleAirConditioning)
+clf(h3_RefrigerationCycleAirConditioning)
+
+plotSubcoolSuperheat(simlog_RefrigerationCycleAirConditioning)
+
+
+
+% Plot subcooling and superheat
+function plotSubcoolSuperheat(simlog)
+
+% Get simulation results
+t = simlog.S4.Saturation_Properties_Sensor_2P.T_sat_liq.series.time;
+T_sat_cond = simlog.S3.Saturation_Properties_Sensor_2P.T_sat_liq.series.values('degC');
+T_out_cond = simlog.S3.Thermodynamic_Properties_Sensor_2P.T.series.values('degC');
+T_sat_evap = simlog.S1.Saturation_Properties_Sensor_2P.T_sat_vap.series.values('degC');
+T_out_evap = simlog.S1.Thermodynamic_Properties_Sensor_2P.T.series.values('degC');
+
+
+% Calculate subcooling and superheat
+subcooling =  T_out_cond- T_sat_cond ;
+superheat = T_out_evap - T_sat_evap;
+
+% Plot results
+handles(1) = subplot(2, 1, 1);
+plot(t, subcooling, 'LineWidth', 1)
+hold on
+plot(t, superheat, 'LineWidth', 1)
+grid on
+title('Subcooling and Superheat (deltaK)')
+legend('Condenser Subcooling', 'Evaporator Superheat', 'Location', 'best')
+
+
+
+
+end
